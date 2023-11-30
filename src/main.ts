@@ -96,6 +96,27 @@ async function getBaseAndHeadShas(
   };
 }
 
+function getEslintRules(): string {
+  const eslintConfigFiles = [
+      ".eslintrc.js",
+      ".eslintrc.cjs",
+      ".eslintrc.json",
+      ".eslintrc.yaml",
+      ".eslintrc.yml",
+      ".eslintrc",
+  ];
+  let eslintRules = readFileSync('rules.txt', 'utf8');
+
+  for (const file of eslintConfigFiles) {
+    try {
+      eslintRules = readFileSync(`/${file}`, 'utf8');
+      break;
+    } catch (e) {}
+  }
+  return eslintRules;
+}
+
+
 function createPrompt(file: File, chunk: Chunk, prDetails: PRDetails): string {
   return `Your task is to review pull requests. Instructions:
 - Provide the response in following JSON format:  [{"lineNumber":  <line_number>, "reviewComment": "<review comment>"}]
@@ -108,7 +129,7 @@ function createPrompt(file: File, chunk: Chunk, prDetails: PRDetails): string {
 - Always propose the code to resolve given issue found by you.
 
 Always use following ESLint rules:
-${readFileSync('rules.txt', 'utf8')}
+${getEslintRules()}
 
 Review the following code diff in the file "${
     file.to
